@@ -1,6 +1,7 @@
 "use strict";
 
 var validator = require("validator");
+const article = require("../models/article");
 var Article = require("../models/article");
 
 var articleController = {
@@ -89,11 +90,30 @@ var articleController = {
     });
   },
   getArticle: (req, res) => {
-    return res.status(200).send({
-      status: "success",
-      message: "get un solo articulo"
-    })
-  }
+    // Recoger el id de url
+    var articleId = req.params.id;
+    // Comprobar que existe
+    if (!articleId || articleId == null) {
+      return res.status(404).send({
+        status: "error",
+        message: "No existe el articulo",
+      });
+    }
+
+    // Buscar articulo y generar respuesta
+    Article.findById(articleId, (err, article) => {
+      if (err || !article) {
+        return res.status(404).send({
+          status: "error",
+          message: "Articulo no encontrado",
+        });
+      }
+      return res.status(200).send({
+        status: "success",
+        article,
+      });
+    });
+  },
 }; // End controller
 
 module.exports = articleController;

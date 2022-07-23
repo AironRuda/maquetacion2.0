@@ -11,7 +11,7 @@ router.get("/test-de-controlador", articleController.test);
 
 // Rustas utiles
 router.post("/save", articleController.save);
-router.get("/articles/:last?", articleController.getArticles);
-
+router.get("/articles/:last?", articleController.getArticles); // parametro opcionalcon ?
+router.get("/article/:id", articleController.getArticle); // Parametro obligatorio sin ?
 
 module.exports = router;
