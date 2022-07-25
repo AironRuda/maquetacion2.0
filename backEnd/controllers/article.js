@@ -1,7 +1,11 @@
 "use strict";
 
 var validator = require("validator");
-const article = require("../models/article");
+
+var fs = require("fs"); // Importa modulo que borra archivo subido
+
+var path = require("path"); // Importa modulo para sacar la ruta de un archivo en el sistema de archivos en el servidor
+
 var Article = require("../models/article");
 
 var articleController = {
@@ -199,6 +203,82 @@ var articleController = {
       status: "error",
       message: "Error al actualizar",
     });
+  },
+  upload: (req, res) => {
+    // Configurar el modulo de conect multiparty router/article.js (hecho)
+
+    // Recoger el fichero de la peticion enviada
+    var file_name = "Imagen no subida"; // Valor por defecto
+
+    if (!req.files) {
+      // Ingresa al if si no se ingresa alguna foto
+      return res.status(404).send({
+        status: "error",
+        message: file_name,
+      });
+    }
+
+    // Conseguir el nombre y la extension del archivo
+    /**
+     * Esta informacion se obtuvo de cargar una imagen a modo de prueba
+     * file0, nombre de lo que se va a enviar (En este caso una imagen)
+     *
+     * al almacenar la informacion del documento cargado, node lo rebautiza con un codigo unico (path)
+     * Se debe segmentar dicho codigo para extraer unicamente dicho nombre
+     */
+    var file_path = req.files.file0.path;
+    var file_split = file_path.split("\\"); // Corta segun el marcador indicado
+
+    // Sacar nombre del archivo
+    var file_name = file_split[2]; // Extrae unicamente el renombre del archivo renombrado y almacenado en upload/articles
+
+    // Extension del fichero
+    var extension_split = file_name.split("."); // De el re nombre divide en nombre y extension
+    var file_ext = extension_split[1]; // Se extrae la extension del archivo
+
+    // Comprobar la extension, solo imagenes, si es valido borrar el fichero
+    if (
+      file_ext != "png" &&
+      file_ext != "jpg" &&
+      file_ext != "jpeg" &&
+      file_ext != "gif"
+    ) {
+      // Borrar el archivo subido si no cumple con la extension
+      fs.unlink(file_path, (err) => {
+        return res.status(200).send({
+          status: "error",
+          message: "La extension de la imagen no es valida",
+        });
+      }); // Borra todo el fichero relacionado con la direccion puntual del documento guardado
+    } else {
+      // Si todo es valido
+      var articleId = req.params.id; // Sacando id del archivo en la base de datos (url)
+
+      // Buscar el articulo, asignarle el nombre de la imagen y actualizarlo
+      Article.findOneAndUpdate(
+        { _id: articleId }, // Documento en la base de datos que quiero modificar
+        { image: file_name }, // Espacio que quiero modificar
+        { new: true }, // Que me enseñe el nuevo documento con los cambios
+        (err, articleUpdated) => {
+          // callBack function, evalua si se presentan errores o hubo exito en la modificacion
+
+          if (err || !articleUpdated) {
+            return res.status(500).send({
+              status: "error",
+              message: "error al guardar la imagen de articulo"
+            })
+          }
+
+          return res.status(200).send({
+            //fichero: req.files, // Extrae datos de la imagen almacenada en una carpeta local
+            //split: file_split,
+            //file_ext,
+            status: "success",
+            article: articleUpdated,
+          });
+        }
+      );
+    }
   },
 }; // End controller
 
