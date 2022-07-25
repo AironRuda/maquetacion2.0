@@ -14,6 +14,7 @@ router.post("/save", articleController.save);
 router.get("/articles/:last?", articleController.getArticles); // parametro opcionalcon ?
 router.get("/article/:id", articleController.getArticle); // Parametro obligatorio sin ?
 router.put("/article/:id", articleController.update);
+router.delete("/article/:id", articleController.delete);
 /**
  * Get, saca infrmacion de la base de datos
  * post, guardar o enviar informacion a la base de datos
