@@ -114,6 +114,63 @@ var articleController = {
       });
     });
   },
+  update: (req, res) => {
+    // Recoger el id de articulo que viene por URL
+    var articleId = req.params.id;
+
+    // Recoger los datos que llegan por put
+    var params = req.body;
+
+    // Validar los datos
+    try {
+      var validate_title = !validator.isEmpty(params.title);
+      var validate_content = !validator.isEmpty(params.content);
+    } catch (err) {
+      return res.status(200).send({
+        status: "error",
+        message: "Faltan datos por enviar",
+      });
+    }
+
+    if (validate_title && validate_content) {
+      // Find and update
+      /**
+       * Primer parametro, es a quien voy a modificar
+       * Segundo parametro, que voy a modificar
+       * Tercer parametro, cracion de nuevo objeto
+       */
+      Article.findOneAndUpdate(
+        { _id: articleId },
+        params,
+        { nee: true },
+        (err, articleUpdated) => {
+          if (err) {
+            return res.status(500).send({
+              status: "error",
+              message: "Error al actualizar",
+            });
+          }
+          if (!articleUpdated) {
+            return res.status(404).send({
+              status: "error",
+              message: "No existe el articulo",
+            });
+          }
+          return res.status(500).send({
+            status: "success",
+            article: articleUpdated,
+          });
+        }
+      );
+    } else {
+      return res.status(200).send({
+        status: "error",
+        message: "Validacion no correcta",
+      });
+    }
+
+    // Dar respuesta
+  },
 }; // End controller
 
 module.exports = articleController;
