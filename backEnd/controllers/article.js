@@ -7,6 +7,7 @@ var fs = require("fs"); // Importa modulo que borra archivo subido
 var path = require("path"); // Importa modulo para sacar la ruta de un archivo en el sistema de archivos en el servidor
 
 var Article = require("../models/article");
+const { title } = require("process");
 
 var articleController = {
   datosCurso: (req, res) => {
@@ -294,6 +295,38 @@ var articleController = {
         });
       }
     });
+  },
+  search: (req, res) => {
+    // Sacar el string a buscar
+    var searchString = req.params.search; // Como el parametro de busqueda se llama search, extrae la informacion del URL de despues de la mencion del metodo search
+
+    // Find or
+    Article.find({
+      $or: [
+        // $or es operador de busqueda de mongo
+        { title: { $regex: searchString, $options: "i" } }, // Si el searchString está incluido dentro del titulo
+        { content: { $regex: searchString, $options: "i" } },
+      ],
+    })
+      .sort([["date", "descending"]])
+      .exec((err, articles) => {
+        if (err) {
+          return res.status(500).send({
+            status: "error",
+            message: "Error en la peticion",
+          });
+        }
+        if (!articles) {
+          return res.status(404).send({
+            status: "error",
+            message: "No hay articulos para mostrar",
+          });
+        }
+        return res.status(200).send({
+          status: "error",
+          articles,
+        });
+      });
   },
 }; // End controller
 
