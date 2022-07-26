@@ -265,8 +265,8 @@ var articleController = {
           if (err || !articleUpdated) {
             return res.status(500).send({
               status: "error",
-              message: "error al guardar la imagen de articulo"
-            })
+              message: "error al guardar la imagen de articulo",
+            });
           }
 
           return res.status(200).send({
@@ -279,6 +279,21 @@ var articleController = {
         }
       );
     }
+  },
+  getImage: (req, res) => {
+    var file = req.params.image; // Extrae el nombre de la imagen
+    var pathFile = "./upload/articles/" + file; // Concatena el lugar de almacenamiento de las imagenes con el nombre de una imagen puntual
+
+    fs.exists(pathFile, (exist) => {
+      if (exist) {
+        return res.sendFile(path.resolve(pathFile)); // Carga libreria path, retorna la imagen puntual
+      } else {
+        return res.status(404).send({
+          status: "error",
+          message: "La imagen no existe",
+        });
+      }
+    });
   },
 }; // End controller
 

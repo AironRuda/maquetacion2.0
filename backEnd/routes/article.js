@@ -19,6 +19,7 @@ router.get("/article/:id", articleController.getArticle); // Parametro obligator
 router.put("/article/:id", articleController.update);
 router.delete("/article/:id", articleController.delete);
 router.post("/upload-image/:id", md_upload, articleController.upload); // Segundo parametro aplica midlewear
+router.get("/get-image/:image", articleController.getImage); // Se ingresa como parametro el nombre de la imagen
 /**
  * Get, saca infrmacion de la base de datos
  * post, guardar o enviar informacion a la base de datos
